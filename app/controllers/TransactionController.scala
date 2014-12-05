@@ -6,6 +6,8 @@ import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import services.json.JsonActions._
 
+import services.json.MarshallableImplicits._
+
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 /**
@@ -18,7 +20,10 @@ object TransactionController extends Controller with MongoController {
   def create = JsonPostAction("mySchema") { jsonObject =>
     collection.insert(jsonObject).map { lastError =>
       Logger.debug(s"Successfully inserted with LastError: $lastError")
-      Created
+      if(lastError.ok)
+        Created(Map("errors" -> Seq()).toJson)
+      else
+        InternalServerError(Map("errors" -> Seq(lastError.err.get)).toJson)
     }
   }
 }
