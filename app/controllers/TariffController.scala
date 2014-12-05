@@ -18,11 +18,7 @@ import models.JsonFormats._
 /**
  * Created by jero on 05/12/14.
  */
-object TariffController extends Controller with MongoController {
-  val tariffService = TariffService(db)
-
-  val EMPTY_CURRENT_FEE = CurrentTariff(0,0,0)
-
+object TariffController extends TariffController {
   def create = JsonPostAction("tariff") { tariff =>
     tariffService.insert(tariff.toString.fromJson[TariffUpdate]).map { either =>
       either match {
@@ -40,6 +36,12 @@ object TariffController extends Controller with MongoController {
       }
     }
   }
+}
+
+trait TariffController extends Controller with MongoController {
+  val tariffService = TariffService(db)
+
+  val EMPTY_CURRENT_FEE = CurrentTariff(0,0,0)
 
   def activatedTariffsQuery = {
     Json.obj("activeStarting" -> Json.obj("$lte" -> new Date().getTime))
