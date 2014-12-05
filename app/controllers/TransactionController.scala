@@ -1,6 +1,7 @@
 package controllers
 
 import play.api._
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
@@ -24,6 +25,20 @@ object TransactionController extends Controller with MongoController {
         Created(Map("errors" -> Seq()).toJson)
       else
         InternalServerError(Map("errors" -> Seq(lastError.err.get)).toJson)
+    }
+  }
+
+  def list = JsonGetAction { request =>
+    // let's do our query
+
+    val cursor = collection.find(Json.obj()).cursor[JsValue]
+
+    // gather all the JsObjects in a list
+    val futureTransactionsList = cursor.collect[List]()
+
+    // everything's ok! Let's reply with the array
+    futureTransactionsList.map { transactions =>
+      Ok(Map("transactions" -> transactions.map(_.toString().toMapOf[AnyRef]() - "_id")).toJson)
     }
   }
 }
