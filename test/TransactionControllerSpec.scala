@@ -42,5 +42,19 @@ class TransactionControllerSpec extends Specification with EmbedConnection with 
           contentAsJson(transactions) must equalTo(noErrorsJson)
         }
       }
+
+    "handle wrong SCPP message" in {
+      running(FakeAppWithTestDb) {
+        val json = Json.obj(
+          "customerId" -> "john"
+        )
+        val transactions = {
+          route(FakeRequest(POST, "/transactions").withJsonBody(json)).get
+        }
+
+        status(transactions) must equalTo(BAD_REQUEST)
+        contentType(transactions) must beSome.which(_ == "application/json")
+      }
+    }
   }
 }
