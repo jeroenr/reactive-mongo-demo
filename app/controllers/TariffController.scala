@@ -2,7 +2,7 @@ package controllers
 
 import java.util.Date
 
-import models.{CurrentFee, Tariff}
+import models.{CurrentTariff, TariffUpdate}
 import play.api._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -21,8 +21,10 @@ import models.JsonFormats._
 object TariffController extends Controller with MongoController {
   val tariffService = TariffService(db)
 
+  val EMPTY_CURRENT_FEE = CurrentTariff(0,0,0)
+
   def create = JsonPostAction("tariff") { tariff =>
-    tariffService.insert(tariff.toString.fromJson[Tariff]).map { either =>
+    tariffService.insert(tariff.toString.fromJson[TariffUpdate]).map { either =>
       either match {
         case Right(_) => Created(Map("errors" -> Seq()).toJson)
         case Left(exc) => InternalServerError(wrapExceptionInJson(exc))
@@ -31,10 +33,10 @@ object TariffController extends Controller with MongoController {
   }
 
   def currentTariff = JsonGetAction { request =>
-    tariffService.findMostRecent[CurrentFee](activatedTariffsQuery).map { maybeTariff =>
+    tariffService.findMostRecent[CurrentTariff](activatedTariffsQuery).map { maybeTariff =>
       maybeTariff match {
         case Some(tariff) => Ok(tariff.toJson)
-        case _ => Ok(CurrentFee(0,0,0).toJson)
+        case _ => Ok(EMPTY_CURRENT_FEE.toJson)
       }
     }
   }
