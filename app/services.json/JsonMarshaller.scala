@@ -9,10 +9,6 @@ object JsonMarshaller {
   mapper.registerModule(DefaultScalaModule)
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-  def toJson(value: collection.Map[Symbol, Any]): String = {
-    toJson(value map { case (k,v) => k.name -> v})
-  }
-
   def toJson(value: Any): String = {
     mapper.writeValueAsString(value)
   }

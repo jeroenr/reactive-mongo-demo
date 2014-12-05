@@ -16,7 +16,7 @@ import play.api.test.Helpers._
 class TransactionControllerSpec extends Specification with EmbedConnection with TestConfig{
   sequential
 
-  "Application" should {
+  "TransactionController" should {
 
       "send 404 on a bad request" in {
         running(FakeAppWithTestDb) {
