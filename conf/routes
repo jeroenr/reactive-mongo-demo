@@ -11,7 +11,8 @@ GET     /tariffs/current                        controllers.TariffController.cur
 
 # Downloadable files
 
-GET /transactions.csv                          controllers.SessionOverviewController.listAsCsv
+GET     /transactions.csv                       controllers.SessionOverviewController.listTransactionsAsCsv
+GET     /chargeSessionsOverview.csv             controllers.SessionOverviewController.chargeSessionsOverviewAsCsv
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

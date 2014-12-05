@@ -1,3 +1,3 @@
-@(transactions: Iterable[Map[String,AnyRef]])
-@for(transaction <- transactions){ @transaction.getOrElse("customerId",""),@transaction.getOrElse("startTime",""),@transaction.getOrElse("endTime",""),@transaction.getOrElse("volume","")
+@(transactions: Iterable[Map[String,Any]])
+@for(transaction <- transactions){ @transaction.getOrElse("customerId",""),@transaction.getOrElse("startTime",""),@transaction.getOrElse("endTime",""),@transaction.getOrElse("volume",""),@transaction.getOrElse("total","")
 }

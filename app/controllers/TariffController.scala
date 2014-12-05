@@ -29,7 +29,7 @@ object TariffController extends TariffController {
   }
 
   def currentTariff = JsonGetAction { request =>
-    tariffService.findMostRecent[CurrentTariff](activatedTariffsQuery).map { maybeTariff =>
+    getActivatedTariff.map { maybeTariff =>
       maybeTariff match {
         case Some(tariff) => Ok(tariff.toJson)
         case _ => Ok(EMPTY_CURRENT_FEE.toJson)
@@ -45,5 +45,9 @@ trait TariffController extends Controller with MongoController {
 
   def activatedTariffsQuery = {
     Json.obj("activeStarting" -> Json.obj("$lte" -> new Date().getTime))
+  }
+
+  def getActivatedTariff = {
+    tariffService.findMostRecent[CurrentTariff](activatedTariffsQuery)
   }
 }
