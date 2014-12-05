@@ -1,8 +1,8 @@
 package services.json
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
 object JsonMarshaller {
   val mapper = new ObjectMapper with ScalaObjectMapper

@@ -1,14 +1,14 @@
 package services.json
 
-import play.api.libs.json.{Reads, JsObject, JsValue}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.JsValue
 import play.api.mvc.BodyParsers._
 import play.api.mvc.Results._
 import play.api.mvc._
-import MarshallableImplicits._
-import ResultImplicits._
+import services.json.MarshallableImplicits._
+import services.json.ResultImplicits._
 
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 
 object JsonActions extends JsonActions
@@ -52,9 +52,6 @@ trait JsonActions {
                      """.stripMargin
   )
 
-
-
-
   def JsonPostAction(jsonSchemaId: String, maxLength: Int)(f: JsValue => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
     implicit request =>
       val jsValue: JsValue = request.body
@@ -69,17 +66,7 @@ trait JsonActions {
       }
   }
 
-  def JsonPostAction[T](maxLength: Int)(f: JsValue => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
-    implicit request =>
-      val jsValue: JsValue = request.body
-      f(jsValue).map(_.asJsonWithAccessControlHeaders)
-  }
-
-
-
   def JsonPostAction(jsonSchemaId: String)(f: JsValue => Future[Result]): Action[JsValue] = JsonPostAction(jsonSchemaId, parse.DEFAULT_MAX_TEXT_LENGTH)(f)
-
-  def JsonPostAction(f: JsValue => Future[Result]): Action[JsValue] = JsonPostAction(parse.DEFAULT_MAX_TEXT_LENGTH)(f)
 
   def JsonGetAction(f: Request[AnyContent] => Future[Result]) = Action.async {
     implicit request =>
@@ -87,6 +74,4 @@ trait JsonActions {
   }
 
   def wrapExceptionInJson(t: Throwable) = Map("exception" -> t.getMessage).toJson
-
-
 }

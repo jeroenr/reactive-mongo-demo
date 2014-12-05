@@ -1,11 +1,10 @@
 package services.json
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.fge.jsonschema.main.JsonSchema
-import com.github.fge.jsonschema.main.JsonSchemaFactory
-import collection.JavaConversions._
+import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
+import services.json.MarshallableImplicits._
 
-import MarshallableImplicits._
+import scala.collection.JavaConversions._
 
 /**
  * Created by jeroen on 4/2/14.
