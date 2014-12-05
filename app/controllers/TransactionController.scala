@@ -19,7 +19,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 object TransactionController extends Controller with MongoController {
   val transactionService = TransactionService(db)
 
-  def create = JsonPostAction("mySchema") { jsonObject =>
+  def create = JsonPostAction("transaction") { jsonObject =>
     transactionService.insert(jsonObject).map { either =>
       either match {
         case Right(_) => Created(Map("errors" -> Seq()).toJson)

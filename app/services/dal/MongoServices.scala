@@ -7,10 +7,12 @@ import services.json.MarshallableImplicits._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
+import scala.concurrent.Future
+
 /**
  * Created by jero on 05/12/14.
  */
-class TransactionService(db: reactivemongo.api.DefaultDB, collectionName: String) {
+class MongoService(db: reactivemongo.api.DefaultDB, collectionName: String) {
   def collection: JSONCollection = db.collection[JSONCollection](collectionName)
 
   def insert(jsObject: JsObject) = collection.insert(jsObject).map { lastError =>
@@ -28,8 +30,21 @@ class TransactionService(db: reactivemongo.api.DefaultDB, collectionName: String
     val cursor = collection.find(query).cursor[JsValue]
     cursor.collect[List]().map(_.map(_.toString().fromJson[T]))
   }
+
+  def findMostRecent[T]()(implicit m : Manifest[T]): Future[Option[T]] = findMostRecent[T](Json.obj())
+
+  def findMostRecent[T](query: JsObject)(implicit m : Manifest[T]): Future[Option[T]] = {
+    collection
+      .find(query)
+      .sort(Json.obj("_id" -> -1))
+      .one[JsObject].map(_.map(_.toString().fromJson[T]))
+  }
 }
 
 object TransactionService {
-  def apply(db: reactivemongo.api.DefaultDB): TransactionService = new TransactionService(db, "transactions")
+  def apply(db: reactivemongo.api.DefaultDB): MongoService = new MongoService(db, "transactions")
+}
+
+object TariffService {
+  def apply(db: reactivemongo.api.DefaultDB): MongoService = new MongoService(db, "tariffs")
 }

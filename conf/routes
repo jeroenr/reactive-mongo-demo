@@ -4,7 +4,10 @@
 
 # API
 POST    /transactions                           controllers.TransactionController.create
-GET    /transactions                           controllers.TransactionController.list
+GET     /transactions                           controllers.TransactionController.list
+
+POST    /tariffs                                controllers.TariffController.create
+GET     /tariffs/current                        controllers.TariffController.currentTariff
 
 # Downloadable files
 

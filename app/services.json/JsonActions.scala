@@ -14,46 +14,51 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 object JsonActions extends JsonActions
 
 trait JsonActions {
+  val WILDCARD_SCHEMA = """{}"""
 
   // TODO: read this from a file
-  val schema =
-    """
-      |
-      |{
-      |    "$schema": "http://json-schema.org/draft-04/schema#",
-      |    "type": "object",
-      |    "required": ["customerId","startTime","endTime","volume"],
-      |    "properties": {
-      |        "customerId": {
-      |            "type": "string"
-      |        },
-      |        "startTime": {
-      |            "type": "string",
-      |            "pattern": "^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
-      |        },
-      |        "endTime": {
-      |            "type": "string",
-      |            "pattern": "^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
-      |        },
-      |        "volume": {
-      |            "anyOf": [
-      |               {
-      |                   "type": "number"
-      |               },
-      |               {
-      |                   "type": "string"
-      |               }
-      |             ]
-      |        }
-      |    },
-      |    "additionalProperties": false
-      |}
-    """.stripMargin
+  val schemaMap = Map(
+    "transaction" -> """
+                       |
+                       |{
+                       |    "$schema": "http://json-schema.org/draft-04/schema#",
+                       |    "type": "object",
+                       |    "required": ["customerId","startTime","endTime","volume"],
+                       |    "properties": {
+                       |        "customerId": {
+                       |            "type": "string"
+                       |        },
+                       |        "startTime": {
+                       |            "type": "string",
+                       |            "pattern": "^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
+                       |        },
+                       |        "endTime": {
+                       |            "type": "string",
+                       |            "pattern": "^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$"
+                       |        },
+                       |        "volume": {
+                       |            "anyOf": [
+                       |               {
+                       |                   "type": "number"
+                       |               },
+                       |               {
+                       |                   "type": "string"
+                       |               }
+                       |             ]
+                       |        }
+                       |    },
+                       |    "additionalProperties": false
+                       |}
+                     """.stripMargin
+  )
+
+
+
 
   def JsonPostAction(jsonSchemaId: String, maxLength: Int)(f: JsObject => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
     implicit request =>
       val jsValue: JsValue = request.body
-      JsonValidator.validateJson(schema, jsValue.toString) match {
+      JsonValidator.validateJson(schemaMap.getOrElse(jsonSchemaId, WILDCARD_SCHEMA), jsValue.toString) match {
         case ValidJson =>
           f(jsValue.asInstanceOf[JsObject]).map(_.asJsonWithAccessControlHeaders)
         case InvalidJson(errors) => Future.successful(BadRequest(Map(
