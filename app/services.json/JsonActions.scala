@@ -1,6 +1,6 @@
 package services.json
 
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.{Reads, JsObject, JsValue}
 import play.api.mvc.BodyParsers._
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -55,12 +55,12 @@ trait JsonActions {
 
 
 
-  def JsonPostAction(jsonSchemaId: String, maxLength: Int)(f: JsObject => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
+  def JsonPostAction(jsonSchemaId: String, maxLength: Int)(f: JsValue => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
     implicit request =>
       val jsValue: JsValue = request.body
       JsonValidator.validateJson(schemaMap.getOrElse(jsonSchemaId, WILDCARD_SCHEMA), jsValue.toString) match {
         case ValidJson =>
-          f(jsValue.asInstanceOf[JsObject]).map(_.asJsonWithAccessControlHeaders)
+          f(jsValue).map(_.asJsonWithAccessControlHeaders)
         case InvalidJson(errors) => Future.successful(BadRequest(Map(
           "exception" -> "The request body violates the schema definition",
           "schema_uri" -> s"${request.host}/schema/${jsonSchemaId}.json",
@@ -69,15 +69,17 @@ trait JsonActions {
       }
   }
 
-  def JsonPostAction(maxLength: Int)(f: JsObject => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
+  def JsonPostAction[T](maxLength: Int)(f: JsValue => Future[Result]) = Action.async(parse.json(maxLength = maxLength)) {
     implicit request =>
       val jsValue: JsValue = request.body
-      f(jsValue.asInstanceOf[JsObject]).map(_.asJsonWithAccessControlHeaders)
+      f(jsValue).map(_.asJsonWithAccessControlHeaders)
   }
 
-  def JsonPostAction(jsonSchemaId: String)(f: JsObject => Future[Result]): Action[JsValue] = JsonPostAction(jsonSchemaId, parse.DEFAULT_MAX_TEXT_LENGTH)(f)
 
-  def JsonPostAction(f: JsObject => Future[Result]): Action[JsValue] = JsonPostAction(parse.DEFAULT_MAX_TEXT_LENGTH)(f)
+
+  def JsonPostAction(jsonSchemaId: String)(f: JsValue => Future[Result]): Action[JsValue] = JsonPostAction(jsonSchemaId, parse.DEFAULT_MAX_TEXT_LENGTH)(f)
+
+  def JsonPostAction(f: JsValue => Future[Result]): Action[JsValue] = JsonPostAction(parse.DEFAULT_MAX_TEXT_LENGTH)(f)
 
   def JsonGetAction(f: Request[AnyContent] => Future[Result]) = Action.async {
     implicit request =>

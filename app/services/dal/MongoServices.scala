@@ -1,27 +1,31 @@
 package services.dal
 
 import play.api.Logger
-import play.api.libs.json.{Json, JsValue, JsObject}
+import play.api.libs.json._
 import play.modules.reactivemongo.json.collection.JSONCollection
+import reactivemongo.core.commands.LastError
 import services.json.MarshallableImplicits._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
-
 /**
  * Created by jero on 05/12/14.
  */
 class MongoService(db: reactivemongo.api.DefaultDB, collectionName: String) {
   def collection: JSONCollection = db.collection[JSONCollection](collectionName)
 
-  def insert(jsObject: JsObject) = collection.insert(jsObject).map { lastError =>
-    Logger.debug(s"Inserted with LastError: $lastError")
-    if(lastError.ok)
-      Right(jsObject)
-    else
-      Left(new RuntimeException(s"Failed to insert: ${lastError.errMsg.get}"))
+  def insert[T](t: T)(implicit writes: Writes[T]) = collection.insert[T](t).map { handleInsert[T](t) }
 
+  def insert(jsObject: JsObject) = collection.insert(jsObject).map { handleInsert[JsObject](jsObject) }
+
+  private def handleInsert[T](t: T): (LastError) => Either[RuntimeException, T] with Product with Serializable = {
+    lastError =>
+      Logger.debug(s"Inserted with LastError: $lastError")
+      if (lastError.ok)
+        Right(t)
+      else
+        Left(new RuntimeException(s"Failed to insert: ${lastError.errMsg.get}"))
   }
 
   def findAll[T]()(implicit m : Manifest[T]) = find[T](Json.obj())
