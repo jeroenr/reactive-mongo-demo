@@ -1,7 +1,7 @@
 package services.dal
 
 import play.api.Logger
-import play.api.libs.json.{JsValue, JsObject}
+import play.api.libs.json.{Json, JsValue, JsObject}
 import play.modules.reactivemongo.json.collection.JSONCollection
 import services.json.MarshallableImplicits._
 
@@ -21,6 +21,8 @@ class TransactionService(db: reactivemongo.api.DefaultDB, collectionName: String
       Left(new RuntimeException(s"Failed to insert: ${lastError.errMsg.get}"))
 
   }
+
+  def findAll[T]()(implicit m : Manifest[T]) = find[T](Json.obj())
 
   def find[T](query: JsObject)(implicit m : Manifest[T]) = {
     val cursor = collection.find(query).cursor[JsValue]
