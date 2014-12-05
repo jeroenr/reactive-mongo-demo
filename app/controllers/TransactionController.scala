@@ -33,4 +33,10 @@ object TransactionController extends Controller with MongoController {
       Ok(Map("transactions" -> (transactions.map(_ - "_id"))).toJson)
     }
   }
+
+  def listAsCsv = Action.async { request =>
+    transactionService.find[Map[String,AnyRef]](Json.obj()).map { transactions =>
+      Ok(views.txt.transactions.transactionsAsCsv(transactions)).as("text/csv")
+    }
+  }
 }
