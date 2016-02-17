@@ -1,15 +1,8 @@
 # Introduction
-This is a simple TVI back office API. It supports:
-
-* SCPP messages on `/transactions` by HTTP POST (application/json)
-* Retrieving current stored SCPP messages on `/transactions` by HTTP GET
-* Tariff messages on `/tariffs` by HTTP POST (application/json)
-* Retrieving the current tariff on `/tariffs/current` by HTTP GET
-* Getting a transactions overview as CSV on `/transactions.csv` by HTTP GET
-* Getting a charge sessions overview as CSV on `/chargeSessionsOverview.csv` by HTTP GET
+This is a reactive mongo demo app.
 
 # Prequisites
-The TVI back office usage MongoDB for it's storage.
+MongoDB is used for storage.
 
 ## Install MongoDB
 [Follow installation instructions for your platform](http://docs.mongodb.org/manual/installation/)

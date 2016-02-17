@@ -1,4 +1,4 @@
-name := """tvi-back-office"""
+name := """reactive-mongo-demo"""
 
 version := "1.0-SNAPSHOT"
 
